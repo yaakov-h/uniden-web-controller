@@ -46,11 +46,12 @@ async function connect() {
         log(`Error: Failed to enter programming mode: ${response[0]}`);
         return;
     }
+
     log('Entered programming mode.')
     log('');
 
     response = await port.send('MEM');
-    log(`Memory used:${response[0]}%`);
+    log(`Memory used: ${response[0]}%`);
 
     response = await port.send('SCT');
     const numSystems = parseInt(response[0], 10);
