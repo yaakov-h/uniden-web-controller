@@ -16,13 +16,11 @@ async function serial_readResponse(reader) {
     while (!response.endsWith('\r')) {
         let data = await reader.read();
         
-        if (data.value !== undefined)
-        {
+        if (data.value !== undefined) {
             response += data.value;
         }
 
-        if (data.done === true)
-        {
+        if (data.done === true) {
             break;
         }
     }
@@ -55,10 +53,7 @@ async function serial_close() {
     await this.port.close();
 }
 
-async function serial_openPort() {
-    const port = await navigator.serial.requestPort();
-
-    const baudRate =  parseInt(document.querySelector('select[name=baud]').value, 10)
+async function serial_connectPort(port, baudRate) {
     await port.open({ baudrate: baudRate });
 
     const decoder = new TextDecoderStream();

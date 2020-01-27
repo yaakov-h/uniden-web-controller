@@ -19,16 +19,17 @@
             <p>This site requires the experimental Web Serial API. Your browser either does not support this, or does not have it enabled.</p>
         </div>
         <div class="connect">
-            <form action="#" onsubmit="connect(); return false;">
+            <form action="#" method="POST" onsubmit="connect(); return false;">
                 <label for="baud">Baud Rate:</label>
                 <select name="baud">
                     <option value="4800">4800</option>
                     <option value="9600">9600</option>
                     <option value="19200">19200</option>
                     <option value="38400">38400</option>
-                    <option value="57600" selected>57600</option>
+                    <option value="57600">57600</option>
                     <option value="115200">115200</option>
                 </select>
+                <button type="button" onclick="autoDetectBaudRate()">Auto-Detect</button>
                 <input type="submit" value="Connect">
             </form>
         </div>
