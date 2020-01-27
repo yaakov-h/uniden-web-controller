@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Yaakov's Uniden Web Demo</title>
+        <link rel="stylesheet" type="text/css" href="site.css" />
+        <script defer type="text/javascript" src="serial.js"></script>
+        <script defer type="text/javascript" src="site.js"></script>
+    </head>
+
+    <body>
+        <header>
+            <h2>Yaakov's Uniden Web Demo</h2>
+        </header>
+        <noscript>
+            <p>This site requires Javascript.</p>
+        </noscript>
+        <div class="noserial hidden">
+            <p>This site requires the experimental Web Serial API. Your browser either does not support this, or does not have it enabled.</p>
+        </div>
+        <div class="connect">
+            <form action="#" onsubmit="connect(); return false;">
+                <label for="baud">Baud Rate:</label>
+                <select name="baud">
+                    <option value="4800">4800</option>
+                    <option value="9600">9600</option>
+                    <option value="19200">19200</option>
+                    <option value="38400">38400</option>
+                    <option value="57600" selected>57600</option>
+                    <option value="115200">115200</option>
+                </select>
+                <input type="submit" value="Connect">
+            </form>
+        </div>
+        <br />
+        <div class="log">
+            <textarea readonly="true" style="min-height:500px; min-width: 500px"></textarea>
+        </div>
+    </body>
+</html>
