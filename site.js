@@ -84,6 +84,8 @@ async function autoDetectBaudRate()
             await port.close();
         }
     }
+
+    log('Could not find any suitable baud rate.');
 }
 
 async function connect() {
