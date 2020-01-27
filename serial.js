@@ -12,9 +12,19 @@ async function serial_writeCommand(writer, text) {
 
 async function serial_readResponse(reader) {
     let response = '';
+
     while (!response.endsWith('\r')) {
         let data = await reader.read();
-        response += data.value;
+        
+        if (data.value !== undefined)
+        {
+            response += data.value;
+        }
+
+        if (data.done === true)
+        {
+            break;
+        }
     }
     
     // Trim the trailing newline
@@ -35,10 +45,14 @@ async function serial_readWrite(reader, writer, command) {
     return response.slice(1);
 }
 
-async function serial_close(port, reader, writer) {
-    await writer.close();
-    await reader.cancel();
-    await port.close();
+async function serial_close() {
+    await this.reader.cancel();
+    await this.inputDone.catch(() => {});
+
+    await this.writer.close();
+    await this.outputDone;
+
+    await this.port.close();
 }
 
 async function serial_openPort() {
@@ -67,6 +81,10 @@ async function serial_openPort() {
         write: serial_writeCommand.bind(undefined, writer),
         read: serial_readResponse.bind(undefined, reader),
         send: serial_readWrite.bind(undefined, reader, writer),
-        close: serial_close.bind(undefined, port, reader, writer),
+        close: serial_close,
+
+        inputDone: inputDone,
+        outputDone: outputDone,
+        outputStream: outputStream,
     }
 }

@@ -28,6 +28,14 @@ async function getSystemDetails(port, index) {
     }
 }
 
+function timeout(ms) {
+    return new Promise((resolve, reject) => {
+        let id = setTimeout(() => {
+        clearTimeout(id);
+        reject(new Error(`Timed out in ${ms}ms.`));
+    }, ms)
+  });
+}
 
 async function connect() {
     const logArea = document.querySelector('div.log textarea');
@@ -37,50 +45,70 @@ async function connect() {
 
     const port = await serial_openPort();
 
-    let response = await port.send('MDL');
-    log(`Model: ${response[0]}`);
-    
-    response = await port.send('PRG');
-    if (response[0] != 'OK')
+    try
     {
-        log(`Error: Failed to enter programming mode: ${response[0]}`);
-        return;
-    }
-
-    log('Entered programming mode.')
-    log('');
-
-    response = await port.send('MEM');
-    log(`Memory used: ${response[0]}%`);
-
-    response = await port.send('SCT');
-    const numSystems = parseInt(response[0], 10);
-    log(`${numSystems} systems detected.`);
-
-    if (numSystems > 0)
-    {
-        const head = await port.send('SIH');
-
-        let currentSystemIndex = parseInt(head, 10);
-        while (currentSystemIndex > 0)
+        let response = await Promise.race([ port.send('MDL'), timeout(5000) ]);
+        
+        log(`Model: ${response[0]}`);
+        
+        response = await port.send('PRG');
+        if (response[0] != 'OK')
         {
-            let systemDetails = await getSystemDetails(port, currentSystemIndex);
-            log(`Found system: ${systemDetails.name}`);
-
-            let nextIndex = await port.send(`FWD,${currentSystemIndex}`);
-            currentSystemIndex = parseInt(nextIndex[0], 10);
+            log(`Error: Failed to enter programming mode: ${response[0]}`);
+            return;
         }
-    }
 
-    response = await port.send('EPG');
-    if (response[0] != 'OK')
-    {
-        log(`Error: Failed to exit programming mode: ${response[0]}`);
-        return;
+        log('Entered programming mode.')
+        log('');
+
+        response = await port.send('MEM');
+        log(`Memory used: ${response[0]}%`);
+
+        response = await port.send('SCT');
+        const numSystems = parseInt(response[0], 10);
+        log(`${numSystems} systems detected.`);
+
+        if (numSystems > 0)
+        {
+            const head = await port.send('SIH');
+
+            let currentSystemIndex = parseInt(head, 10);
+            while (currentSystemIndex > 0)
+            {
+                let systemDetails = await getSystemDetails(port, currentSystemIndex);
+                log(`Found system: ${systemDetails.name}`);
+
+                let nextIndex = await port.send(`FWD,${currentSystemIndex}`);
+                currentSystemIndex = parseInt(nextIndex[0], 10);
+            }
+        }
+
+        response = await port.send('EPG');
+        if (response[0] != 'OK')
+        {
+            log(`Error: Failed to exit programming mode: ${response[0]}`);
+            return;
+        }
+        log('Exited programming mode.');
+
+        await port.close();
+        log('Disconnected.');
     }
-    log('Exited programming mode.');
-    await port.close();
-    log('Disconnected.');
+    catch (error)
+    {
+        log(`Unhandled error: ${error.message}`);
+        log('Disconnecting...');
+
+        try
+        {
+            await port.close();
+        }
+        catch
+        {
+        }
+
+        log('Disconnected.');
+    }
 }
 
 document.addEventListener("DOMContentLoaded", function(event) {
