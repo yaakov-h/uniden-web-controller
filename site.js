@@ -60,7 +60,6 @@ async function connect() {
     if (numSystems > 0)
     {
         const head = await port.send('SIH');
-        const tail = await port.send('SIT');
 
         let currentSystemIndex = parseInt(head, 10);
         while (currentSystemIndex > 0)
